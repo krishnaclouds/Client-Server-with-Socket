@@ -68,6 +68,13 @@ def insert_record(conn_insert, name, age, addr, phone):
     except Exception as e:
         print(e)
         return None
+    
+def delete_user(name, conn_delete):
+    try:
+        conn_delete.execute("DELETE FROM USERS WHERE NAME = '{name}'".format(name = name))
+        return None
+    except Exception as e:
+        raise Exception(e)
 
 
 def read_file_and_load_data(conn_for_insert):
@@ -166,7 +173,13 @@ def start_socket_server(connections, conn):
                         c.send(bytes('\nAdded User Successfully\n', 'utf-8'))
                     else:
                         c.send(bytes('\nUser Already Exists\n', 'utf-8'))
-                
+                elif msg['val'] == '3':
+                    user = find_user(msg['name'], conn)
+                    if user == USER_NOT_FOUND:
+                        c.send(bytes(USER_NOT_FOUND, 'utf-8'))
+                    else:
+                        delete_user(msg['name'], conn)
+                        c.send(bytes('\nDeleted User Successfully\n', 'utf-8'))
                 else:
                     print("Error Occured. Please try again")
             except Exception as e:
