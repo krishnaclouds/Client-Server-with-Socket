@@ -42,7 +42,10 @@ def clean_name(data, col_type='NONE'):
 
 def insert_record(conn_insert, name, age, addr, phone):
     try:
-        print(conn_insert)
+        conn_insert.execute(
+            "INSERT INTO USERS (NAME, AGE, ADDRESS, PHONE) VALUES ('{name}', {age}, '{addr}', '{phone}')".format(
+                name=name, age=age, addr=addr, phone=phone))
+        conn_insert.commit()
     except Exception as e:
         print(e)
         return None
@@ -70,15 +73,15 @@ def connect_data_base():
 def create_table(conn_for_tbl):
     print("Creating DB Tables")
     try:
-        conn_for_tbl.execute('''CREATE TABLE USERS
-         (ID INT PRIMARY KEY     NOT NULL,
+        result = conn_for_tbl.execute('''CREATE TABLE USERS
+         (ID INTEGER PRIMARY KEY  AUTOINCREMENT,
          NAME           TEXT    NOT NULL,
          AGE            INT     NULL,
          ADDRESS        TEXT NULL,
          PHONE VARCHAR(256) NULL);''')
-        return None
+        print(result)
     except Exception as e:
-        return None
+        print(e)
 
 
 def load_data():
