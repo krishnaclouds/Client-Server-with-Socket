@@ -1,10 +1,11 @@
 import socket
+import json
 
 s = socket.socket()
 port = 9999
 s.connect(('127.0.0.1', port))
-message = s.recv(1024).decode()
-print(message)
+# message = s.recv(1024).decode()
+# print(message)
 
 
 def populate_menu():
@@ -24,9 +25,13 @@ program_status = True
 while program_status:
     populate_menu()
     val = input("Select : ")
-    print(type(val))
+    if val == '1':
+        data = input("Enter Name of the User to Find >> ")
+        s.send(bytes(json.dumps({ 'val' : val, 'data' : data}), 'utf-8'))
+        print(s.recv(1024).decode())
+    # print(type(val))
     if val == '8':
         program_status = False
-    s.send(bytes(val, 'utf-8'))
-    # s.send(bytes('Message to Server', 'utf-8'))
-    print(s.recv(1024).decode())
+    # s.send(bytes(val, 'utf-8'))
+    # # s.send(bytes('Message to Server', 'utf-8'))
+    # print(s.recv(1024).decode())

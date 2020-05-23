@@ -3,6 +3,7 @@ import sqlite3
 import csv
 import re
 import random
+import json
 
 
 def clean_age(data):
@@ -90,7 +91,34 @@ def load_data():
     print("Loaded Data")
 
 
-def start_socket_server(connections):
+def find_user(name, conn):
+    try:
+        msg = ''
+        result = conn.execute("SELECT NAME, AGE, ADDRESS, PHONE from USERS where NAME = '{name}'".format(name=name))
+        print(result)
+        for row in result:
+            msg  = "\n*******************************************\n"
+            msg = msg + "Customer Details Found\n"
+            msg = msg + "*******************************************\n"
+            msg = msg + "Name >> " + row[0] + "\n"
+            if row[1] < 0:
+                msg = msg + "Age >> Not Available\n"
+            else:
+                msg = msg + "Age >> " + str(row[1]) + "\n"
+            msg = msg + "Address >> " + row[2] + "\n"
+            msg = msg + "Phone >> " + row[3] + "\n"
+            msg = msg + "*******************************************\n"
+        
+        if msg == '':
+            return 'customer not found'
+        else:
+            return msg
+    except Exception as e:
+        print(e)
+        return "customer not found"
+
+
+def start_socket_server(connections, conn):
     s = socket.socket()
     print("Socket Created")
     port = 9999
@@ -102,10 +130,24 @@ def start_socket_server(connections):
         c, addr = s.accept()
         print(c)
         print(addr)
-        c.send(bytes('Thank you for connecting', 'utf-8'))
+        # c.send(bytes('Thank you for connecting', 'utf-8'))
         while c:
-            print(c.recv(1024).decode())
-            c.send(bytes('Got Your Message', 'utf-8'))
+            try:
+                msg = c.recv(1024).decode()
+                msg = json.loads(msg)
+                print(msg)
+                if msg['val'] == '1':
+                    print(type(msg))
+                    print(msg['data'])
+                    # c.send(bytes('Searching ...', 'utf-8'))
+                    user = find_user(msg['data'], conn)
+                    c.send(bytes(user,'utf-8'))
+                else:
+                    print("Error Occured. Please try again")
+            except Exception as e:
+                print(e)
+                c.send(bytes('Got Your Message', 'utf-8'))
+            # c.send(bytes('Got Your Message', 'utf-8'))
 
 
 if __name__ == '__main__':
