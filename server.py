@@ -17,6 +17,14 @@ def clean_age(data):
         return -1
 
 
+def clean_age_error(data):
+    try:
+        r = re.sub(r"\W", "", data)
+        return int(r)
+    except Exception as e:
+        raise Exception(e)
+
+
 def clean_other_data(data):
     try:
         # print(data)
@@ -25,6 +33,15 @@ def clean_other_data(data):
     except Exception as e:
         # print(e)
         return ''
+
+
+def clean_other_data_eror(data):
+    try:
+        # print(data)
+        r = re.sub(' +', ' ', data)
+        return r.strip()
+    except Exception as e:
+        raise Exception(e)
 
 
 def clean_name(data, col_type='NONE'):
@@ -47,9 +64,9 @@ def clean_name(data, col_type='NONE'):
 def insert_record_clean(conn_insert, name, age, addr, phone):
     try:
         name = clean_name((name))
-        age=clean_age(age)
-        addr=clean_other_data(addr)
-        phone=clean_other_data(phone)
+        age = clean_age(age)
+        addr = clean_other_data(addr)
+        phone = clean_other_data(phone)
         conn_insert.execute(
             "INSERT INTO USERS (NAME, AGE, ADDRESS, PHONE) VALUES ('{name}', {age}, '{addr}', '{phone}')".format(
                 name=name, age=age, addr=addr, phone=phone))
@@ -68,11 +85,32 @@ def insert_record(conn_insert, name, age, addr, phone):
     except Exception as e:
         print(e)
         return None
-    
+
+
 def delete_user(name, conn_delete):
     try:
-        conn_delete.execute("DELETE FROM USERS WHERE NAME = '{name}'".format(name = name))
+        conn_delete.execute("DELETE FROM USERS WHERE NAME = '{name}'".format(name=name))
         return None
+    except Exception as e:
+        raise Exception(e)
+
+
+def update_details(name, detail, detail_type, conn_update):
+    try:
+        if detail_type == 'age':
+            detail = clean_age_error(detail)
+            query = "UPDATE USERS SET {detail_type} = {detail} where name = '{name}'"
+        else:
+            detail = clean_other_data_eror(detail)
+            query = "UPDATE USERS SET {detail_type} = '{detail}' where name = '{name}'"
+        conn_update.execute(query.format(detail_type = detail_type, name = name , detail = detail))
+        conn_update.commit()
+        result = conn_update.total_changes
+        print("No of updated Rows >> " + str(result))
+        if result == 1:
+            return 'Updated Details Successfully'
+        else:
+            return "Failed to Update. Either No User Found or Details are in invalid fromat"
     except Exception as e:
         raise Exception(e)
 
@@ -180,6 +218,15 @@ def start_socket_server(connections, conn):
                     else:
                         delete_user(msg['name'], conn)
                         c.send(bytes('\nDeleted User Successfully\n', 'utf-8'))
+                elif msg['val'] == '4':
+                    result = update_details(msg['name'], msg['age'], 'age', conn)
+                    c.send(bytes(result, 'utf-8'))
+                elif msg['val'] == '5':
+                    result = update_details(msg['name'], msg['address'], 'address', conn)
+                    c.send(bytes(result, 'utf-8'))
+                elif msg['val'] == '6':
+                    result = update_details(msg['name'], msg['phone'], 'phone', conn)
+                    c.send(bytes(result, 'utf-8'))
                 else:
                     print("Error Occured. Please try again")
             except Exception as e:

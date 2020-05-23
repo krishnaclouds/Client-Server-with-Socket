@@ -49,12 +49,12 @@ while program_status:
         print(s.recv(4096).decode())
     elif val == '5':
         name = input("Enter Name of the user >> ")
-        age = input("Enter Address of the User >> ")
+        address = input("Enter Address of the User >> ")
         s.send(bytes(json.dumps({'val': val, 'name': name, 'address': address}), 'utf-8'))
         print(s.recv(4096).decode())
     elif val == '6':
         name = input("Enter Name of the user >> ")
-        age = input("Enter Phone of the User >> ")
+        phone = input("Enter Phone of the User >> ")
         s.send(bytes(json.dumps({'val': val, 'name': name, 'phone': phone}), 'utf-8'))
         print(s.recv(4096).decode())
     elif val == '7':
