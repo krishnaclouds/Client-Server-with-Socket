@@ -29,6 +29,13 @@ while program_status:
         data = input("Enter Name of the User to Find >> ")
         s.send(bytes(json.dumps({ 'val' : val, 'data' : data}), 'utf-8'))
         print(s.recv(1024).decode())
+    if val == '2':
+        name = input("Enter Name of the User >> ")
+        age = input("Enter Age of the User >> ")
+        address = input("Enter Address of the User >> ")
+        phone = input("Enter Phone of the User >> ")
+        s.send(bytes(json.dumps({ 'val' : val, 'name' : name, 'age': age, 'address' : address, 'phone' : phone}), 'utf-8'))
+        print(s.recv(1024).decode())
     # print(type(val))
     if val == '8':
         program_status = False

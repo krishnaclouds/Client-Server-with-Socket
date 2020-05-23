@@ -5,6 +5,8 @@ import re
 import random
 import json
 
+USER_NOT_FOUND = 'customer not found'
+
 
 def clean_age(data):
     try:
@@ -39,6 +41,21 @@ def clean_name(data, col_type='NONE'):
             return r
     except Exception as e:
         # print(e)
+        raise Exception(e)
+
+
+def insert_record_clean(conn_insert, name, age, addr, phone):
+    try:
+        name = clean_name((name))
+        age=clean_age(age)
+        addr=clean_other_data(addr)
+        phone=clean_other_data(phone)
+        conn_insert.execute(
+            "INSERT INTO USERS (NAME, AGE, ADDRESS, PHONE) VALUES ('{name}', {age}, '{addr}', '{phone}')".format(
+                name=name, age=age, addr=addr, phone=phone))
+        conn_insert.commit()
+    except Exception as e:
+        print(e)
         raise Exception(e)
 
 
@@ -97,7 +114,7 @@ def find_user(name, conn):
         result = conn.execute("SELECT NAME, AGE, ADDRESS, PHONE from USERS where NAME = '{name}'".format(name=name))
         print(result)
         for row in result:
-            msg  = "\n*******************************************\n"
+            msg = "\n*******************************************\n"
             msg = msg + "Customer Details Found\n"
             msg = msg + "*******************************************\n"
             msg = msg + "Name >> " + row[0] + "\n"
@@ -110,12 +127,12 @@ def find_user(name, conn):
             msg = msg + "*******************************************\n"
         
         if msg == '':
-            return 'customer not found'
+            return USER_NOT_FOUND
         else:
             return msg
     except Exception as e:
         print(e)
-        return "customer not found"
+        return USER_NOT_FOUND
 
 
 def start_socket_server(connections, conn):
@@ -141,12 +158,20 @@ def start_socket_server(connections, conn):
                     print(msg['data'])
                     # c.send(bytes('Searching ...', 'utf-8'))
                     user = find_user(msg['data'], conn)
-                    c.send(bytes(user,'utf-8'))
+                    c.send(bytes(user, 'utf-8'))
+                elif msg['val'] == '2':
+                    user = find_user(msg['name'], conn)
+                    if user == USER_NOT_FOUND:
+                        insert_record_clean(conn, msg['name'], msg['age'], msg['address'], msg['phone'])
+                        c.send(bytes('\nAdded User Successfully\n', 'utf-8'))
+                    else:
+                        c.send(bytes('\nUser Already Exists\n', 'utf-8'))
+                
                 else:
                     print("Error Occured. Please try again")
             except Exception as e:
                 print(e)
-                c.send(bytes('Got Your Message', 'utf-8'))
+                c.send(bytes('Something Went Wrong. Try Again with Proper Fields', 'utf-8'))
             # c.send(bytes('Got Your Message', 'utf-8'))
 
 
