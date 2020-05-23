@@ -2,6 +2,7 @@ import socket
 import sqlite3
 import csv
 import re
+import random
 
 
 def clean_age(data):
@@ -66,6 +67,7 @@ def read_file_and_load_data(conn_for_insert):
 
 def connect_data_base():
     print("Data base Connected")
+    # conn = sqlite3.connect('UserMaster_{name}.db'.format(name = str(random.randrange(100, 199, 3))))
     conn = sqlite3.connect('UserMaster.db')
     return conn
 
@@ -109,6 +111,6 @@ def start_socket_server(connections):
 if __name__ == '__main__':
     no_of_connections = 100
     conn = connect_data_base()
-    create_table(conn)
-    read_file_and_load_data(conn)
-    # start_socket_server(no_of_connections)
+    # create_table(conn)
+    # read_file_and_load_data(conn)
+    start_socket_server(no_of_connections, conn)
