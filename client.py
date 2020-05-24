@@ -7,6 +7,7 @@ s.connect(('127.0.0.1', port))
 
 print("Initial Report" + s.recv(4096).decode())
 
+
 def populate_menu():
     print("Menu")
     print("1. Find customer")
@@ -17,6 +18,7 @@ def populate_menu():
     print("6. Update customer phone")
     print("7. Print report")
     print("8. Exit")
+
 
 program_status = True
 while program_status:
@@ -56,6 +58,7 @@ while program_status:
         s.send(bytes(json.dumps({'val': val}), 'utf-8'))
         print(s.recv(4096).decode())
     elif val == '8':
+        print("Good Bye")
         program_status = False
     else:
         print("Please Select a valid Input")

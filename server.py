@@ -186,10 +186,10 @@ def load_data():
     print("Loaded Data")
 
 
-def find_user(name, conn):
+def find_user(name, conn_user_find):
     try:
         msg = ''
-        result = conn.execute("SELECT NAME, AGE, ADDRESS, PHONE from USERS where NAME = '{name}'".format(name=name))
+        result = conn_user_find.execute("SELECT NAME, AGE, ADDRESS, PHONE from USERS where NAME = '{name}'".format(name=name))
         print(result)
         for row in result:
             msg = "\n*******************************************\n"
@@ -268,7 +268,7 @@ def start_socket_server(connections, conn):
                 elif msg['val'] == '8':
                     c.close()
                 else:
-                    print("Error Occured. Please try again")
+                    print("Error Occurred. Please try again")
             except Exception as e:
                 print(e)
                 try:
