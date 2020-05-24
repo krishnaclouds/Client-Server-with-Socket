@@ -163,8 +163,8 @@ def read_file_and_load_data(conn_for_insert):
 
 def connect_data_base():
     print("Data base Connected")
-    # conn = sqlite3.connect('UserMaster_{name}.db'.format(name = str(random.randrange(100, 199, 3))))
-    conn = sqlite3.connect('UserMaster.db')
+    conn = sqlite3.connect('UserMaster_{name}.db'.format(name = str(random.randrange(100, 199, 3))))
+    # conn = sqlite3.connect('UserMaster.db')
     return conn
 
 
