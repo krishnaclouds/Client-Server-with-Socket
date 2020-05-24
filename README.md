@@ -1,5 +1,5 @@
 > This is Done as a part of College Assignment
-1. Refer to A1.pdf for Assignment Question
+1. Refer to <a href="https://github.com/krishnaclouds/ClientServerWithSocketExample/blob/master/A1.pdf">A1.pdf</a> for Assignment Question
 ---
 > ####What this Project Demonstrate ?
 ````
