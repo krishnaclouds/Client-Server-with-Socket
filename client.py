@@ -5,10 +5,7 @@ s = socket.socket()
 port = 9999
 s.connect(('127.0.0.1', port))
 
-
-# message = s.recv(1024).decode()
-# print(message)
-
+print("Initial Report" + s.recv(4096).decode())
 
 def populate_menu():
     print("Menu")
@@ -21,9 +18,7 @@ def populate_menu():
     print("7. Print report")
     print("8. Exit")
 
-
 program_status = True
-
 while program_status:
     populate_menu()
     val = input("Select : ")
@@ -64,6 +59,3 @@ while program_status:
         program_status = False
     else:
         print("Please Select a valid Input")
-    # s.send(bytes(val, 'utf-8'))
-    # # s.send(bytes('Message to Server', 'utf-8'))
-    # print(s.recv(1024).decode())

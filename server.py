@@ -4,6 +4,7 @@ import csv
 import re
 import random
 import json
+import pprint
 
 USER_NOT_FOUND = 'customer not found'
 
@@ -103,7 +104,7 @@ def update_details(name, detail, detail_type, conn_update):
         else:
             detail = clean_other_data_eror(detail)
             query = "UPDATE USERS SET {detail_type} = '{detail}' where name = '{name}'"
-        conn_update.execute(query.format(detail_type = detail_type, name = name , detail = detail))
+        conn_update.execute(query.format(detail_type=detail_type, name=name, detail=detail))
         conn_update.commit()
         result = conn_update.total_changes
         print("No of updated Rows >> " + str(result))
@@ -111,6 +112,38 @@ def update_details(name, detail, detail_type, conn_update):
             return 'Updated Details Successfully'
         else:
             return "Failed to Update. Either No User Found or Details are in invalid fromat"
+    except Exception as e:
+        raise Exception(e)
+    
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
+
+def get_report(report_conn):
+    try:
+        cursor = report_conn.execute("SELECT NAME, CASE when AGE < 0 THEN NULL ELSE AGE END AS AGE, ADDRESS, "
+                                     "PHONE from USERS ORDER BY NAME ASC")
+        data = cursor.fetchall()
+        print(data)
+        msg =     "\n--------------------------------------------------------------------------------------------------------------------------------\n"
+        msg = msg + "┆***************************************************     "+ color.BOLD + color.UNDERLINE + color.BLUE + "REPORT" + color.END + color.END + color.END +"     ************************************************************┆"
+        msg = msg + "\n--------------------------------------------------------------------------------------------------------------------------------\n"
+        msg = msg + "┆ "+ color.RED + color.BOLD +"Name" + color.END + color.END + "\t\t\t\t┆ "+ color.RED + color.BOLD +"Age"+ color.END + color.END\
+              + "\t\t┆ "+ color.RED + color.BOLD + "Address" + color.END + color.END +  "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t┆ "+ color.RED + color.BOLD + "Phone" + color.END + color.END + "\t\t\t\t\t┆\n"
+        msg = msg + "--------------------------------------------------------------------------------------------------------------------------------\n"
+        for row in data:
+            msg = msg + "┆ " +  row[0] + " "*(18-len(row[0])) + "┆ " + str(row[1]) + " "*(10-len(str(row[1]))) + "┆ " + row[2] + " "*(70 - len(row[2])) + "┆ " + row[3] + " "*(22-len(row[3])) + "┆\n"
+        msg = msg + "--------------------------------------------------------------------------------------------------------------------------------\n"
+        print(msg)
+        return msg
     except Exception as e:
         raise Exception(e)
 
@@ -124,7 +157,7 @@ def read_file_and_load_data(conn_for_insert):
                 insert_record(conn_for_insert, clean_name(row[0], "NAME"), clean_age(row[1]), clean_other_data(row[2]),
                               clean_other_data(row[3]))
             except Exception as e:
-                print("Skipping the Record As Invalid Input is provided >> " + '|'.join(row))
+                print("Skipping the Record As Invalid Input is provided >> " + ':'.join(row))
             # print(clean_age(row[1]))
 
 
@@ -192,6 +225,8 @@ def start_socket_server(connections, conn):
         c, addr = s.accept()
         print(c)
         print(addr)
+        msg = get_report(conn)
+        c.send(bytes(msg, 'utf-8'))
         # c.send(bytes('Thank you for connecting', 'utf-8'))
         while c:
             try:
@@ -227,16 +262,25 @@ def start_socket_server(connections, conn):
                 elif msg['val'] == '6':
                     result = update_details(msg['name'], msg['phone'], 'phone', conn)
                     c.send(bytes(result, 'utf-8'))
+                elif msg['val'] == '7':
+                    msg = get_report(conn)
+                    c.send(bytes(msg, 'utf-8'))
+                elif msg['val'] == '8':
+                    c.close()
                 else:
                     print("Error Occured. Please try again")
             except Exception as e:
                 print(e)
-                c.send(bytes('Something Went Wrong. Try Again with Proper Fields', 'utf-8'))
+                try:
+                    c.send(bytes('Something Went Wrong. Try Again with Proper Fields', 'utf-8'))
+                except Exception as e:
+                    s.close()
+                    start_socket_server(1, conn)
             # c.send(bytes('Got Your Message', 'utf-8'))
 
 
 if __name__ == '__main__':
-    no_of_connections = 100
+    no_of_connections = 1
     conn = connect_data_base()
     # create_table(conn)
     # read_file_and_load_data(conn)
