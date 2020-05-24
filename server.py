@@ -282,6 +282,6 @@ def start_socket_server(connections, conn):
 if __name__ == '__main__':
     no_of_connections = 1
     conn = connect_data_base()
-    # create_table(conn)
-    # read_file_and_load_data(conn)
+    create_table(conn)
+    read_file_and_load_data(conn)
     start_socket_server(no_of_connections, conn)
